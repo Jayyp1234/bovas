@@ -8,6 +8,7 @@ import {
   LifeBuoy,
   Settings,
   Users,
+  Ticket,
   type LucideIcon,
 } from "lucide-react";
 
@@ -17,6 +18,8 @@ export interface NavItem {
   icon: LucideIcon;
   /** Shows a small status dot next to the item (e.g. new activity). */
   hasIndicator?: boolean;
+  /** Shows a numeric count badge next to the item. */
+  badge?: number;
 }
 
 /** Primary sidebar navigation for the logistics dashboard shell. */
@@ -47,4 +50,12 @@ export const adminNav: NavItem[] = [
   { label: "Reports", href: "/admin/activity-reports", icon: Folder },
   { label: "Support", href: "/admin/support", icon: LifeBuoy },
   { label: "Settings", href: "/admin/settings", icon: Settings },
+];
+
+/** Safety officer sidebar navigation. */
+export const safetyNav: NavItem[] = [
+  { label: "Tickets Queue", href: "/safety/tickets", icon: Ticket, badge: 35 },
+  { label: "History", href: "/safety/history", icon: History },
+  { label: "Support", href: "/safety/support", icon: LifeBuoy },
+  { label: "Settings", href: "/safety/settings", icon: Settings },
 ];
