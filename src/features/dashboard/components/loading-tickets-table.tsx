@@ -118,7 +118,7 @@ export function LoadingTicketsTable() {
       <div className="overflow-x-auto">
         <table className="w-full min-w-[760px] text-sm">
           <thead>
-            <tr className="border-b border-border text-left text-xs font-medium text-muted-foreground">
+            <tr className="border-b border-border bg-muted/40 text-left text-xs font-medium text-muted-foreground">
               {COLUMNS.map((column) => (
                 <th key={column} className="px-5 py-3 font-medium">
                   {column}

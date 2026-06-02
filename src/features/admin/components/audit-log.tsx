@@ -161,7 +161,7 @@ export function AuditLog() {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[920px] text-sm">
             <thead>
-              <tr className="border-b border-border text-left text-xs font-medium text-muted-foreground">
+              <tr className="border-b border-border bg-muted/40 text-left text-xs font-medium text-muted-foreground">
                 <th className="w-10 px-5 py-3">
                   <input
                     type="checkbox"

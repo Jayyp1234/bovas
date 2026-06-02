@@ -112,7 +112,7 @@ export function LoadingProgramForm() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">
+            <p className="text-sm font-medium text-muted-foreground">
               Loading Ticket
             </p>
             <h1 className="text-3xl font-bold tracking-tight text-foreground">

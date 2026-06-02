@@ -72,28 +72,41 @@ export function LoadingProgramTable() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 border-y border-border px-5 py-4">
-        {FILTERS.map((item) => (
-          <button
-            key={item}
-            type="button"
-            onClick={() => setFilter(item)}
-            className={cn(
-              "rounded-full px-4 py-2 text-xs font-medium transition-colors",
-              filter === item
-                ? "bg-primary text-primary-foreground"
-                : "bg-surface text-muted-foreground hover:bg-muted",
-            )}
-          >
-            {item}
-          </button>
-        ))}
+      <div className="flex items-center gap-2 border-b border-border px-5">
+        <div className="relative mr-auto py-3">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-subtle" />
+          <Input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search tickets…"
+            aria-label="Search tickets"
+            className="h-9 w-44 pl-9 text-xs"
+          />
+        </div>
+        {FILTERS.map((item) => {
+          const active = filter === item;
+          return (
+            <button
+              key={item}
+              type="button"
+              onClick={() => setFilter(item)}
+              className={cn(
+                "-mb-px border-b-2 px-1 py-2.5 text-sm font-medium transition-colors",
+                active
+                  ? "border-primary text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {item}
+            </button>
+          );
+        })}
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full min-w-[760px] text-sm">
           <thead>
-            <tr className="border-b border-border text-left text-xs font-medium text-muted-foreground">
+            <tr className="border-b border-border bg-muted/40 text-left text-xs font-medium text-muted-foreground">
               {COLUMNS.map((column) => (
                 <th key={column} className="px-5 py-3 font-medium">
                   {column}

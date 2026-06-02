@@ -1,8 +1,23 @@
 # BOVAS & Company — Logistics Platform
 
-Front end for the BOVAS & Company fuel-logistics platform: a sign-in screen and a
-logistics dashboard (operations overview, per-marketer charts, and loading-ticket
-management).
+Front end for the BOVAS & Company fuel-logistics platform — a sign-in screen plus
+three role-based dashboards (Logistics, Admin, Safety).
+
+## Dashboards & preview
+
+Live: **https://bovas.vercel.app/**  ·  Local: `npm run dev` → `http://localhost:3000`
+
+| Dashboard | For | Path | Highlights |
+| --------- | --- | ---- | ---------- |
+| **Logistics** | Logistics Officer | `/dashboard` | Operations stats, per-marketer charts, today's loading tickets, generate-ticket flow, ticket history |
+| **Admin** | Admin | `/admin` → `/admin/dashboard` | 4 stat cards + charts, audit log (+ detail), staff management (+ detail/add), marketers' records, activity reports |
+| **Safety** | Safety Officer | `/safety` → `/safety/tickets` | Tickets queue + safety checklist (approve/reject), inspection history log (+ detail) |
+
+`/` is the **Sign In** screen; clicking **Sign In** lands on the Logistics dashboard.
+Visit `/admin` or `/safety` directly for the other two.
+
+Useful sub-pages: `/generate-ticket`, `/ticket-history` · `/admin/audit`, `/admin/staff` ·
+`/safety/tickets`, `/safety/history`.
 
 ## Tech stack
 
@@ -18,7 +33,7 @@ management).
 
 ```bash
 npm install
-npm run dev      # http://localhost:3000  (redirects to /sign-in)
+npm run dev      # http://localhost:3000  (sign-in at /)
 npm run build    # production build (also typechecks + lints)
 npm run lint
 ```

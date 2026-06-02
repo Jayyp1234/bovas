@@ -1,164 +1,109 @@
+import { type ReactNode } from "react";
 import Link from "next/link";
-import { Edit3, ChevronLeft } from "lucide-react";
+import { ChevronLeft, Pencil } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "./status-badge";
-import type { TicketDetail } from "@/features/dashboard/data/tickets";
+import type { TicketDetail as TicketDetailData } from "@/features/dashboard/data/tickets";
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section>
+      <div className="mb-3 inline-flex rounded-lg bg-muted px-4 py-2 text-sm font-medium text-foreground">
+        {title}
+      </div>
+      <div className="rounded-2xl border border-border bg-surface p-4 sm:p-5">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+function Field({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-border px-4 py-3">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-1 text-sm font-semibold text-foreground">{value}</p>
+    </div>
+  );
+}
 
 interface TicketDetailProps {
-  ticket: TicketDetail;
+  ticket: TicketDetailData;
 }
 
 export function TicketDetail({ ticket }: TicketDetailProps) {
+  const editable = ticket.status !== "approved";
+  const multi = ticket.destinations.length > 1;
+
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <Link
-            href="/ticket-history"
-            className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <ChevronLeft className="size-4" />
-            Back
-          </Link>
+    <div className="mx-auto max-w-5xl space-y-6">
+      <Link
+        href="/ticket-history"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ChevronLeft className="size-4" />
+        Back
+      </Link>
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="text-lg font-bold tracking-tight text-foreground">
+            Ticket {ticket.id} | {ticket.terminal}
+          </h1>
+          <StatusBadge status={ticket.status} />
         </div>
-        {ticket.status === "pending" ? (
-          <Button variant="outline" size="sm">
-            <Edit3 className="size-4" />
+        {editable && (
+          <Button variant="secondary" size="sm">
             Edit
+            <Pencil className="size-4" />
           </Button>
-        ) : null}
+        )}
       </div>
 
-      <div className="rounded-[2rem] border border-border bg-surface p-6 shadow-sm">
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold text-foreground">
-              Ticket {ticket.id} | {ticket.terminal}
-            </h1>
-            <StatusBadge status={ticket.status} />
-          </div>
+      <Section title="Truck Information">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Field label="Truck Type" value={ticket.truckType} />
+          <Field label="Truck Number" value={ticket.truckNumber} />
+          <Field label="Product" value={ticket.product} />
+          <Field label="Requested Loading Amount" value={ticket.requestedAmount} />
         </div>
+      </Section>
 
-        <Card className="rounded-[1.5rem] border-border bg-surface/80 shadow-none">
-          <CardHeader>
-            <CardTitle>Truck Information</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-4">
-            <div className="rounded-3xl border border-border bg-white px-4 py-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                Truck Type
-              </p>
-              <p className="mt-2 text-sm font-semibold text-foreground">
-                {ticket.truckType}
-              </p>
-            </div>
-            <div className="rounded-3xl border border-border bg-white px-4 py-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                Truck Number
-              </p>
-              <p className="mt-2 text-sm font-semibold text-foreground">
-                {ticket.truckNumber}
-              </p>
-            </div>
-            <div className="rounded-3xl border border-border bg-white px-4 py-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                Product
-              </p>
-              <p className="mt-2 text-sm font-semibold text-foreground">
-                {ticket.product}
-              </p>
-            </div>
-            <div className="rounded-3xl border border-border bg-white px-4 py-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                Requested Loading Amount
-              </p>
-              <p className="mt-2 text-sm font-semibold text-foreground">
-                {ticket.requestedAmount}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-[1.5rem] border-border bg-surface/80 shadow-none">
-          <CardHeader>
-            <CardTitle>Destination / Distribution Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {ticket.destinations.map((destination, index) => (
-              <div key={index} className="rounded-3xl border border-border bg-white p-5">
-                <div className="flex items-start gap-4">
-                  {ticket.destinations.length > 1 ? (
-                    <div className="text-2xl font-semibold text-muted-foreground">
-                      {String(index + 1).padStart(2, "0")}
-                    </div>
-                  ) : null}
-                  <div className="flex-1 space-y-3">
-                    <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                          Station
-                        </p>
-                        <p className="mt-2 text-sm font-semibold text-foreground">
-                          {destination.station}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                          Amount to be Discharged
-                        </p>
-                        <p className="mt-2 text-sm font-semibold text-foreground">
-                          {destination.amount}
-                        </p>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                        Address
-                      </p>
-                      <p className="mt-2 text-sm font-semibold text-foreground">
-                        {destination.address}
-                      </p>
-                    </div>
-                  </div>
+      <Section title="Destination/Distribution Information">
+        <div className="space-y-5">
+          {ticket.destinations.map((destination, index) => (
+            <div
+              key={index}
+              className={cn("grid gap-4", multi && "grid-cols-[2.5rem_1fr]")}
+            >
+              {multi && (
+                <span className="text-lg font-extrabold text-foreground">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+              )}
+              <div className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label="Station" value={destination.station} />
+                  <Field
+                    label="Amount to be Discharged"
+                    value={destination.amount}
+                  />
                 </div>
+                <Field label="Address" value={destination.address} />
               </div>
-            ))}
-          </CardContent>
-        </Card>
+            </div>
+          ))}
+        </div>
+      </Section>
 
-        <Card className="rounded-[1.5rem] border-border bg-surface/80 shadow-none">
-          <CardHeader>
-            <CardTitle>Marketer&apos;s Information</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-3xl border border-border bg-white px-4 py-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                Marketer
-              </p>
-              <p className="mt-2 text-sm font-semibold text-foreground">
-                {ticket.marketerInfo.marketer}
-              </p>
-            </div>
-            <div className="rounded-3xl border border-border bg-white px-4 py-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                Name
-              </p>
-              <p className="mt-2 text-sm font-semibold text-foreground">
-                {ticket.marketerInfo.representative}
-              </p>
-            </div>
-            <div className="rounded-3xl border border-border bg-white px-4 py-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                Phone Number
-              </p>
-              <p className="mt-2 text-sm font-semibold text-foreground">
-                {ticket.marketerInfo.phone}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Section title="Marketer's Information">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Field label="Marketer" value={ticket.marketerInfo.marketer} />
+          <Field label="Name" value={ticket.marketerInfo.representative} />
+          <Field label="Phone Number" value={ticket.marketerInfo.phone} />
+        </div>
+      </Section>
     </div>
   );
 }
