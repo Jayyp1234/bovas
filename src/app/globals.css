@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+/*
+ * BOVAS & Company — Design tokens
+ * Single source of truth for color, typography, and radii.
+ * Consume everywhere via Tailwind utilities: bg-primary, text-muted-foreground,
+ * border-border, rounded-card, etc. Never hardcode hex values in components.
+ */
+@theme {
+  /* Brand */
+  --color-primary: #f5c242;
+  --color-primary-hover: #e7ad2c;
+  --color-primary-foreground: #1b1b1f;
+
+  /* Surfaces & text */
+  --color-background: #f1f1f2;
+  --color-surface: #ffffff;
+  --color-foreground: #1b1b1f;
+  --color-muted: #f4f4f5;
+  --color-muted-foreground: #6b7280;
+  --color-subtle: #9ca3af;
+  --color-border: #e8e8eb;
+  --color-input: #e4e4e7;
+  --color-ring: #f5c242;
+
+  /* Status */
+  --color-success: #15803d;
+  --color-success-surface: #dcfce7;
+  --color-warning: #b45309;
+  --color-warning-surface: #fdecc8;
+  --color-danger: #dc2626;
+  --color-danger-surface: #fde8e8;
+
+  /* Data visualisation */
+  --color-chart: #d8c9a3;
+  --color-chart-track: #f0ece1;
+
+  /* Typography */
+  --font-sans:
+    var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
+
+  /* Radii */
+  --radius-card: 1rem;
+}
+
+:root {
+  color-scheme: light;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+}
