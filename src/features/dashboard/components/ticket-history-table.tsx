@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Search,
-  ArrowUpDown,
-  SlidersHorizontal,
   Download,
   ChevronDown,
   FileText,
   Sheet,
+  MoreHorizontal,
+  Eye,
+  Printer,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -51,15 +53,20 @@ const COLUMNS = [
 const controlSelect =
   "h-9 rounded-lg border border-border bg-surface px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40";
 
+const menuItem =
+  "flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-muted";
+
 function matchesFilter(ticket: LoadingTicket, filter: FilterKey) {
   if (filter === "All") return true;
   return ticket.truckType === filter;
 }
 
 export function TicketHistoryTable() {
+  const router = useRouter();
   const [filter, setFilter] = useState<FilterKey>("All");
   const [query, setQuery] = useState("");
   const [exportOpen, setExportOpen] = useState(false);
+  const [openRow, setOpenRow] = useState<string | null>(null);
 
   const rows = loadingTickets.filter((ticket) => {
     if (!matchesFilter(ticket, filter)) return false;
@@ -125,7 +132,7 @@ export function TicketHistoryTable() {
                   <button
                     type="button"
                     onClick={() => setExportOpen(false)}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-muted"
+                    className={menuItem}
                   >
                     <FileText className="size-4 text-muted-foreground" />
                     Export as PDF
@@ -133,7 +140,7 @@ export function TicketHistoryTable() {
                   <button
                     type="button"
                     onClick={() => setExportOpen(false)}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-muted"
+                    className={menuItem}
                   >
                     <Sheet className="size-4 text-muted-foreground" />
                     Export as Sheet
@@ -177,7 +184,7 @@ export function TicketHistoryTable() {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[820px] text-sm">
+        <table className="w-full min-w-[880px] text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/40 text-left text-xs font-medium text-muted-foreground">
               <th className="w-10 px-5 py-3 font-medium">
@@ -188,6 +195,7 @@ export function TicketHistoryTable() {
                   {column}
                 </th>
               ))}
+              <th className="w-12 px-5 py-3 text-right font-medium">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -220,12 +228,67 @@ export function TicketHistoryTable() {
                 <td className="px-5 py-3.5 text-muted-foreground">
                   {ticket.destination}
                 </td>
+                <td className="px-5 py-3.5 text-right">
+                  <div className="relative inline-block">
+                    <button
+                      type="button"
+                      aria-label={`Actions for ticket ${ticket.id}`}
+                      onClick={() =>
+                        setOpenRow(openRow === ticket.id ? null : ticket.id)
+                      }
+                      className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted"
+                    >
+                      <MoreHorizontal className="size-4" />
+                    </button>
+                    {openRow === ticket.id && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-40"
+                          onClick={() => setOpenRow(null)}
+                          aria-hidden
+                        />
+                        <div className="absolute right-0 top-9 z-50 w-44 overflow-hidden rounded-lg border border-border bg-surface py-1 shadow-lg">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setOpenRow(null);
+                              router.push(`/ticket-history/${ticket.id}`);
+                            }}
+                            className={menuItem}
+                          >
+                            <Eye className="size-4 text-muted-foreground" />
+                            View Ticket
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setOpenRow(null);
+                              window.print();
+                            }}
+                            className={menuItem}
+                          >
+                            <Printer className="size-4 text-muted-foreground" />
+                            Print Ticket
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setOpenRow(null)}
+                            className={menuItem}
+                          >
+                            <Download className="size-4 text-muted-foreground" />
+                            Download Ticket
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </td>
               </tr>
             ))}
             {rows.length === 0 && (
               <tr>
                 <td
-                  colSpan={COLUMNS.length + 1}
+                  colSpan={COLUMNS.length + 2}
                   className="px-5 py-12 text-center text-sm text-muted-foreground"
                 >
                   No ticket history entries match your filters.
