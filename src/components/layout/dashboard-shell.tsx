@@ -2,24 +2,28 @@
 
 import { useState, type ReactNode } from "react";
 import { X } from "lucide-react";
-import { Sidebar, SidebarContent } from "@/components/layout/sidebar";
+import { Sidebar, SidebarContent, type DashboardRole } from "@/components/layout/sidebar";
 import { Topbar, type TopbarUser } from "@/components/layout/topbar";
 
 /**
- * Placeholder signed-in user. Replace with real session data once auth lands.
+ * Placeholder signed-in users per role. Replaced when a real profile is passed in.
  */
-const adminUser: TopbarUser = {
-  name: "Olayinka Fagboore",
-  role: "Admin",
+const USER_BY_ROLE: Record<DashboardRole, TopbarUser> = {
+  admin: { name: "Olayinka Fagboore", role: "Admin" },
+  logistics: { name: "Olateju Oyetoke", role: "Logistics" },
+  dispatch: { name: "Chidinma Eboh", role: "Dispatch" },
 };
 
-const logisticsUser: TopbarUser = {
-  name: "Olateju Oyetoke",
-  role: "Logistics",
-};
-
-export function DashboardShell({ children, role = "logistics" }: { children: ReactNode; role?: "admin" | "logistics" }) {
-  const currentUser = role === "admin" ? adminUser : logisticsUser;
+export function DashboardShell({
+  children,
+  role = "logistics",
+  user,
+}: {
+  children: ReactNode;
+  role?: DashboardRole;
+  user?: TopbarUser | null;
+}) {
+  const currentUser = user ?? USER_BY_ROLE[role];
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (

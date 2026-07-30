@@ -9,6 +9,7 @@ import {
   Settings,
   Users,
   Ticket,
+  Truck,
   type LucideIcon,
 } from "lucide-react";
 
@@ -50,6 +51,25 @@ export const adminNav: NavItem[] = [
   { label: "Reports", href: "/admin/activity-reports", icon: Folder },
   { label: "Support", href: "/admin/support", icon: LifeBuoy },
   { label: "Settings", href: "/admin/settings", icon: Settings },
+];
+
+/** Dispatch officer sidebar navigation. */
+export const dispatchNav: NavItem[] = [
+  { label: "Home", href: "/dispatch/dashboard", icon: House },
+  {
+    label: "Dispatch Queue",
+    href: "/dispatch/queue",
+    icon: Truck,
+    hasIndicator: true,
+  },
+  { label: "Reports", href: "/dispatch/reports", icon: FileText },
+  {
+    label: "Waybill History",
+    href: "/dispatch/waybill-history",
+    icon: History,
+  },
+  { label: "Support", href: "/dispatch/support", icon: LifeBuoy },
+  { label: "Settings", href: "/dispatch/settings", icon: Settings },
 ];
 
 /** Safety officer sidebar navigation. */

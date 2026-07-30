@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, Menu, CheckCircle2, ClipboardList, TriangleAlert } from "lucide-react";
+import { Bell, Menu, CheckCircle2, ClipboardList, TriangleAlert, FileText } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 
@@ -41,6 +41,18 @@ const NOTIFICATIONS: Record<string, Notification[]> = {
       icon: TriangleAlert,
       title: "Dispatch requested approval for overloading on truck BDJ580XB.",
       time: "12m ago",
+    },
+  ],
+  Dispatch: [
+    {
+      icon: TriangleAlert,
+      title: "Truck BDJ580XB is overloaded by +500 Litres. Admin approval required.",
+      time: "8m ago",
+    },
+    {
+      icon: FileText,
+      title: "Loading ticket #21040705 is approved and ready for a waybill.",
+      time: "40m ago",
     },
   ],
 };

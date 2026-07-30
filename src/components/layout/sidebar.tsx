@@ -1,24 +1,51 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { dashboardNav, adminNav } from "@/config/nav";
+import { dashboardNav, adminNav, dispatchNav } from "@/config/nav";
 import { siteConfig } from "@/config/site";
 import { Logo } from "@/components/brand/logo";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { createClient } from "@/lib/supabase/client";
+
+export type DashboardRole = "admin" | "logistics" | "dispatch";
+
+const NAV_BY_ROLE = {
+  admin: adminNav,
+  logistics: dashboardNav,
+  dispatch: dispatchNav,
+} as const;
+
+const SUBTITLE_BY_ROLE: Record<DashboardRole, string> = {
+  admin: siteConfig.tagline,
+  logistics: siteConfig.tagline,
+  dispatch: "Dispatch Dashboard",
+};
 
 /** Inner navigation, shared by the desktop rail and the mobile drawer. */
-export function SidebarContent({ role = "logistics", onNavigate }: { role?: "admin" | "logistics"; onNavigate?: () => void }) {
+export function SidebarContent({ role = "logistics", onNavigate }: { role?: DashboardRole; onNavigate?: () => void }) {
   const pathname = usePathname();
-  const navItems = role === "admin" ? adminNav : dashboardNav;
+  const router = useRouter();
+  const navItems = NAV_BY_ROLE[role];
+
+  async function handleLogout() {
+    onNavigate?.();
+    if (isSupabaseConfigured()) {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    }
+    router.push("/");
+    router.refresh();
+  }
 
   return (
     <div className="flex h-full flex-col gap-6 px-4 py-6">
       <div className="px-2">
         <Logo />
         <p className="mt-3 text-xs font-medium text-muted-foreground">
-          {siteConfig.tagline}
+          {SUBTITLE_BY_ROLE[role]}
         </p>
       </div>
 
@@ -57,20 +84,20 @@ export function SidebarContent({ role = "logistics", onNavigate }: { role?: "adm
         })}
       </nav>
 
-      <Link
-        href="/"
-        onClick={onNavigate}
-        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-danger transition-colors hover:bg-danger-surface"
+      <button
+        type="button"
+        onClick={handleLogout}
+        className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-danger transition-colors hover:bg-danger-surface"
       >
         <LogOut className="size-[18px]" aria-hidden />
         Logout
-      </Link>
+      </button>
     </div>
   );
 }
 
 /** Fixed desktop sidebar rail (hidden below the lg breakpoint). */
-export function Sidebar({ role = "logistics" }: { role?: "admin" | "logistics" }) {
+export function Sidebar({ role = "logistics" }: { role?: DashboardRole }) {
   return (
     <aside className="hidden w-64 shrink-0 border-r border-border bg-surface lg:block">
       <div className="sticky top-0 h-screen">

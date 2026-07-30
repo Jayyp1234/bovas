@@ -8,15 +8,68 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { createClient } from "@/lib/supabase/client";
+import { homePathForRole } from "@/lib/auth/roles";
+import type { AppRole } from "@/lib/supabase/database.types";
 
 export function SignInForm() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    // TODO: replace with real authentication. For now, proceed to the dashboard.
-    router.push("/dashboard");
+    setError(null);
+
+    const form = new FormData(event.currentTarget);
+    const identifier = String(form.get("identifier") ?? "").trim();
+    const password = String(form.get("password") ?? "");
+
+    if (!identifier || !password) {
+      setError("Enter your email and password.");
+      return;
+    }
+
+    // Local/demo mode: no Supabase env yet — keep the existing mock redirect.
+    if (!isSupabaseConfigured()) {
+      router.push("/dashboard");
+      return;
+    }
+
+    setPending(true);
+    try {
+      const supabase = createClient();
+      const { data, error: signInError } =
+        await supabase.auth.signInWithPassword({
+          email: identifier,
+          password,
+        });
+
+      if (signInError) {
+        setError(signInError.message);
+        return;
+      }
+
+      let role: AppRole = "logistics";
+      if (data.user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", data.user.id)
+          .maybeSingle();
+
+        if (profile?.role) role = profile.role;
+      }
+
+      router.push(homePathForRole(role));
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sign in failed.");
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
@@ -31,9 +84,11 @@ export function SignInForm() {
           <Input
             id="identifier"
             name="identifier"
+            type="email"
             autoComplete="username"
             placeholder="Enter your username/work email"
             className="h-14 rounded-xl"
+            required
           />
         </div>
 
@@ -49,6 +104,7 @@ export function SignInForm() {
               autoComplete="current-password"
               placeholder="Enter your password"
               className="h-14 rounded-xl pr-12"
+              required
             />
             <button
               type="button"
@@ -78,8 +134,18 @@ export function SignInForm() {
           </Link>
         </div>
 
-        <Button type="submit" className="h-14 w-full rounded-xl text-base">
-          Sign In
+        {error ? (
+          <p className="text-sm text-danger" role="alert">
+            {error}
+          </p>
+        ) : null}
+
+        <Button
+          type="submit"
+          disabled={pending}
+          className="h-14 w-full rounded-xl text-base"
+        >
+          {pending ? "Signing in…" : "Sign In"}
         </Button>
       </div>
     </form>

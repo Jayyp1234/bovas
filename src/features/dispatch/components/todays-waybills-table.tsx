@@ -14,52 +14,42 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { formatLitres } from "@/lib/format";
-import { StatusBadge } from "./status-badge";
-import type { LoadingTicket, TicketStatus } from "../types";
+import { waybills } from "../data/waybills";
+import type { TruckType } from "../data/waybills";
 
 const TABS = [
   { key: "all", label: "All" },
-  { key: "approved", label: "Approved" },
-  { key: "pending", label: "Pending" },
-  { key: "failed", label: "Failed" },
+  { key: "Internal", label: "Internal" },
+  { key: "Marketer", label: "Marketer" },
+  { key: "Industrial", label: "Industrial" },
 ] as const;
 
 type TabKey = (typeof TABS)[number]["key"];
 
 const COLUMNS = [
-  "Loading Ticket ID",
+  "Waybill ID",
   "Customer",
+  "Truck Type",
   "Truck Number",
   "Product",
-  "Quantity",
-  "Status",
+  "Requested Quantity",
 ];
 
 const toolbarButton =
   "inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted";
 
-function matchesTab(ticket: LoadingTicket, tab: TabKey): boolean {
-  if (tab === "all") return true;
-  if (tab === "failed") return ticket.status === "rejected";
-  return ticket.status === (tab as TicketStatus);
-}
-
-interface LoadingTicketsTableProps {
-  tickets: LoadingTicket[];
-}
-
-export function LoadingTicketsTable({ tickets }: LoadingTicketsTableProps) {
+export function TodaysWaybillsTable() {
   const [tab, setTab] = useState<TabKey>("all");
   const [query, setQuery] = useState("");
 
-  const rows = tickets.filter((ticket) => {
-    if (!matchesTab(ticket, tab)) return false;
+  const rows = waybills.filter((item) => {
+    if (tab !== "all" && item.truckType !== (tab as TruckType)) return false;
     if (!query.trim()) return true;
     const q = query.trim().toLowerCase();
     return (
-      ticket.id.includes(q) ||
-      ticket.customer.toLowerCase().includes(q) ||
-      ticket.truckNumber.toLowerCase().includes(q)
+      item.id.toLowerCase().includes(q) ||
+      item.customer.toLowerCase().includes(q) ||
+      item.truckNumber.toLowerCase().includes(q)
     );
   });
 
@@ -67,7 +57,7 @@ export function LoadingTicketsTable({ tickets }: LoadingTicketsTableProps) {
     <Card className="overflow-hidden">
       <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-base font-semibold text-foreground">
-          Today&apos;s Loading Tickets
+          Today&apos;s Waybills
         </h3>
         <div className="flex items-center gap-2">
           <div className="relative">
@@ -75,8 +65,8 @@ export function LoadingTicketsTable({ tickets }: LoadingTicketsTableProps) {
             <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search tickets…"
-              aria-label="Search tickets"
+              placeholder="Search waybills…"
+              aria-label="Search waybills"
               className="h-9 w-40 pl-9 text-xs sm:w-48"
             />
           </div>
@@ -93,7 +83,7 @@ export function LoadingTicketsTable({ tickets }: LoadingTicketsTableProps) {
 
       <div
         role="tablist"
-        aria-label="Ticket status"
+        aria-label="Truck type"
         className="flex gap-6 border-b border-border px-5"
       >
         {TABS.map((item) => {
@@ -133,38 +123,38 @@ export function LoadingTicketsTable({ tickets }: LoadingTicketsTableProps) {
             </tr>
           </thead>
           <tbody>
-            {rows.map((ticket) => (
+            {rows.map((item) => (
               <tr
-                key={ticket.id}
+                key={item.id}
                 className="border-b border-border transition-colors last:border-0 hover:bg-muted/50"
               >
                 <td className="px-5 py-3.5 font-medium text-foreground">
                   <Link
-                    href={`/ticket-history/${ticket.id}`}
+                    href={`/dispatch/waybill-history/${item.id}`}
                     className="transition-colors hover:text-primary"
                   >
-                    {ticket.id}
+                    {item.id}
                   </Link>
                 </td>
                 <td className="px-5 py-3.5 text-muted-foreground">
-                  {ticket.customer}
+                  {item.customer}
                 </td>
                 <td className="px-5 py-3.5 text-muted-foreground">
-                  {ticket.truckNumber}
+                  {item.truckType}
                 </td>
                 <td className="px-5 py-3.5 text-muted-foreground">
-                  {ticket.product}
+                  {item.truckNumber}
                 </td>
                 <td className="px-5 py-3.5 text-muted-foreground">
-                  {formatLitres(ticket.quantity)}
+                  {item.product}
                 </td>
-                <td className="px-5 py-3.5">
-                  <StatusBadge status={ticket.status} />
+                <td className="px-5 py-3.5 text-muted-foreground">
+                  {formatLitres(item.requestedQuantity)}
                 </td>
                 <td className="px-5 py-3.5 text-right">
                   <Link
-                    href={`/ticket-history/${ticket.id}`}
-                    aria-label={`View ticket ${ticket.id}`}
+                    href={`/dispatch/waybill-history/${item.id}`}
+                    aria-label={`View waybill ${item.id}`}
                     className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted"
                   >
                     <MoreHorizontal className="size-4" />
@@ -178,7 +168,7 @@ export function LoadingTicketsTable({ tickets }: LoadingTicketsTableProps) {
                   colSpan={COLUMNS.length + 1}
                   className="px-5 py-12 text-center text-sm text-muted-foreground"
                 >
-                  No tickets match your filters.
+                  No waybills match your filters.
                 </td>
               </tr>
             )}

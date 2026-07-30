@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { TicketDetail as TicketDetailComponent } from "@/features/dashboard/components/ticket-detail";
-import { getTicketDetailById } from "@/features/dashboard/data/tickets";
+import { getTicketDetailById } from "@/features/dashboard/data/queries";
 
 export const metadata: Metadata = { title: "Ticket Details" };
 
@@ -10,12 +10,12 @@ interface TicketDetailPageProps {
 
 export default async function TicketDetailPage({ params }: TicketDetailPageProps) {
   const { ticketId } = await params;
-  const ticket = getTicketDetailById(ticketId);
+  const ticket = await getTicketDetailById(ticketId);
 
   if (!ticket) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <p className="text-sm font-medium text-destructive">
+        <p className="text-sm font-medium text-danger">
           Ticket not found.
         </p>
       </div>
