@@ -66,7 +66,8 @@ async function send(path: string, { method = "GET", query, body, token }: Reques
     throw new Error("API_URL is not set. Add it to .env.local to call bovas-api.");
   }
 
-  const url = new URL(path, baseUrl);
+  // Appended rather than resolved, so an API_URL in a subfolder (https://host/elizabeth) keeps it.
+  const url = new URL(`${baseUrl.replace(/\/+$/, "")}${path}`);
   for (const [key, value] of Object.entries(query ?? {})) {
     if (value !== undefined && value !== null && value !== "") {
       url.searchParams.set(key, String(value));
