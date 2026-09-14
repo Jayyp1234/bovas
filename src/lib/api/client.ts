@@ -81,7 +81,11 @@ async function send(path: string, { method = "GET", query, body, token }: Reques
   const headers: Record<string, string> = { Accept: "application/json" };
   // fetch sets the multipart boundary itself.
   if (body !== undefined && !isMultipart) headers["Content-Type"] = "application/json";
-  if (bearer) headers.Authorization = `Bearer ${bearer}`;
+  if (bearer) {
+    headers.Authorization = `Bearer ${bearer}`;
+    // Some Apache/cPanel hosts strip Authorization before PHP sees it; bovas-api also reads this.
+    headers["X-Auth-Token"] = bearer;
+  }
 
   const response = await fetch(url, {
     method,
