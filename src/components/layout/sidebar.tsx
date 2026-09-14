@@ -4,14 +4,29 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { dashboardNav, adminNav } from "@/config/nav";
+import { adminNav, dashboardNav, dispatchNav, type NavItem } from "@/config/nav";
 import { siteConfig } from "@/config/site";
 import { Logo } from "@/components/brand/logo";
+import { signOut } from "@/features/auth/actions";
+
+export type Workspace = "admin" | "logistics" | "dispatch";
+
+const NAV: Record<Workspace, NavItem[]> = {
+  admin: adminNav,
+  logistics: dashboardNav,
+  dispatch: dispatchNav,
+};
 
 /** Inner navigation, shared by the desktop rail and the mobile drawer. */
-export function SidebarContent({ role = "logistics", onNavigate }: { role?: "admin" | "logistics"; onNavigate?: () => void }) {
+export function SidebarContent({
+  workspace,
+  onNavigate,
+}: {
+  workspace: Workspace;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
-  const navItems = role === "admin" ? adminNav : dashboardNav;
+  const navItems = NAV[workspace];
 
   return (
     <div className="flex h-full flex-col gap-6 px-4 py-6">
@@ -57,24 +72,25 @@ export function SidebarContent({ role = "logistics", onNavigate }: { role?: "adm
         })}
       </nav>
 
-      <Link
-        href="/"
-        onClick={onNavigate}
-        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-danger transition-colors hover:bg-danger-surface"
-      >
-        <LogOut className="size-[18px]" aria-hidden />
-        Logout
-      </Link>
+      <form action={signOut}>
+        <button
+          type="submit"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-danger transition-colors hover:bg-danger-surface"
+        >
+          <LogOut className="size-[18px]" aria-hidden />
+          Logout
+        </button>
+      </form>
     </div>
   );
 }
 
 /** Fixed desktop sidebar rail (hidden below the lg breakpoint). */
-export function Sidebar({ role = "logistics" }: { role?: "admin" | "logistics" }) {
+export function Sidebar({ workspace }: { workspace: Workspace }) {
   return (
-    <aside className="hidden w-64 shrink-0 border-r border-border bg-surface lg:block">
+    <aside className="hidden w-64 shrink-0 border-r border-border bg-surface lg:block print:!hidden">
       <div className="sticky top-0 h-screen">
-        <SidebarContent role={role} />
+        <SidebarContent workspace={workspace} />
       </div>
     </aside>
   );

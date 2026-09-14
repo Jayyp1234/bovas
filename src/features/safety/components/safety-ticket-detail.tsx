@@ -2,7 +2,9 @@ import { type ReactNode } from "react";
 import Link from "next/link";
 import { ChevronLeft, TriangleAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { SafetyRecord } from "../data/safety";
+import { formatDepotDate } from "@/lib/format";
+import { REJECTION_REASON_LABEL, TRUCK_TYPE_LABEL } from "@/domain/labels";
+import type { Inspection } from "@/lib/api/types";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -26,8 +28,11 @@ function Field({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function SafetyTicketDetail({ record }: { record: SafetyRecord }) {
-  const rejected = record.status === "rejected";
+export function SafetyTicketDetail({ inspection }: { inspection: Inspection }) {
+  const rejected = inspection.result === "rejected";
+  const reason =
+    inspection.notes ??
+    (inspection.reason_code ? REJECTION_REASON_LABEL[inspection.reason_code] : null);
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -41,7 +46,8 @@ export function SafetyTicketDetail({ record }: { record: SafetyRecord }) {
 
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-lg font-bold tracking-tight text-foreground">
-          {record.truckNumber} - {record.date} | {record.terminal}
+          {inspection.truck.plate} - {formatDepotDate(inspection.inspected_at)} |{" "}
+          {inspection.terminal.name}
         </h1>
         <span
           className={cn(
@@ -55,25 +61,25 @@ export function SafetyTicketDetail({ record }: { record: SafetyRecord }) {
         </span>
       </div>
 
-      {rejected && record.reason && (
+      {rejected && reason && (
         <div className="flex items-center gap-2 rounded-xl bg-danger-surface px-4 py-3 text-sm font-medium text-danger">
           <TriangleAlert className="size-4 shrink-0" />
-          Reason: {record.reason}
+          Reason: {reason}
         </div>
       )}
 
       <Section title="Truck Information">
         <div className="grid gap-4 sm:grid-cols-3">
-          <Field label="Truck Type" value={record.truckType} />
-          <Field label="Customer" value={record.customer} />
-          <Field label="Loading Ticket ID" value={record.id} />
+          <Field label="Truck Type" value={TRUCK_TYPE_LABEL[inspection.truck.type]} />
+          <Field label="Customer" value={inspection.customer.name} />
+          <Field label="Loading Ticket ID" value={inspection.ticket_no} />
         </div>
       </Section>
 
       <Section title="Driver's Information">
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Name" value={record.driverName} />
-          <Field label="Phone Number" value={record.driverPhone} />
+          <Field label="Name" value={inspection.driver?.name ?? "Not recorded"} />
+          <Field label="Phone Number" value={inspection.driver?.phone ?? "Not recorded"} />
         </div>
       </Section>
     </div>

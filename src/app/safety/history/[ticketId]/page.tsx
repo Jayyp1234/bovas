@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SafetyTicketDetail } from "@/features/safety/components/safety-ticket-detail";
-import { getSafetyRecordById } from "@/features/safety/data/safety";
+import { getInspection } from "@/lib/api/safety";
 
 export const metadata: Metadata = { title: "Ticket Detail" };
 
@@ -13,11 +13,11 @@ export default async function SafetyTicketDetailPage({
   params,
 }: SafetyTicketDetailPageProps) {
   const { ticketId } = await params;
-  const record = getSafetyRecordById(ticketId);
+  const inspection = await getInspection(ticketId);
 
-  if (!record) {
+  if (!inspection) {
     notFound();
   }
 
-  return <SafetyTicketDetail record={record} />;
+  return <SafetyTicketDetail inspection={inspection} />;
 }

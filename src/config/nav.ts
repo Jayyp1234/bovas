@@ -9,6 +9,8 @@ import {
   Settings,
   Users,
   Ticket,
+  Truck,
+  Fuel,
   type LucideIcon,
 } from "lucide-react";
 
@@ -18,8 +20,6 @@ export interface NavItem {
   icon: LucideIcon;
   /** Shows a small status dot next to the item (e.g. new activity). */
   hasIndicator?: boolean;
-  /** Shows a numeric count badge next to the item. */
-  badge?: number;
 }
 
 /** Primary sidebar navigation for the logistics dashboard shell. */
@@ -54,8 +54,17 @@ export const adminNav: NavItem[] = [
 
 /** Safety officer sidebar navigation. */
 export const safetyNav: NavItem[] = [
-  { label: "Tickets Queue", href: "/safety/tickets", icon: Ticket, badge: 35 },
+  { label: "Tickets Queue", href: "/safety/tickets", icon: Ticket },
   { label: "History", href: "/safety/history", icon: History },
   { label: "Support", href: "/safety/support", icon: LifeBuoy },
   { label: "Settings", href: "/safety/settings", icon: Settings },
+];
+
+/** Dispatch sidebar navigation: one queue for each step after Safety. */
+export const dispatchNav: NavItem[] = [
+  { label: "Loading Queue", href: "/dispatch/loading", icon: Fuel },
+  { label: "Waybills", href: "/dispatch/waybills", icon: FileText },
+  { label: "Gate", href: "/dispatch/gate", icon: Truck },
+  { label: "Support", href: "/dispatch/support", icon: LifeBuoy },
+  { label: "Settings", href: "/dispatch/settings", icon: Settings },
 ];

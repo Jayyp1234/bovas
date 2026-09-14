@@ -2,29 +2,25 @@
 
 import { useState, type ReactNode } from "react";
 import { X } from "lucide-react";
-import { Sidebar, SidebarContent } from "@/components/layout/sidebar";
-import { Topbar, type TopbarUser } from "@/components/layout/topbar";
+import { Sidebar, SidebarContent, type Workspace } from "@/components/layout/sidebar";
+import { Topbar } from "@/components/layout/topbar";
+import type { NotificationList, User } from "@/lib/api/types";
 
-/**
- * Placeholder signed-in user. Replace with real session data once auth lands.
- */
-const adminUser: TopbarUser = {
-  name: "Olayinka Fagboore",
-  role: "Admin",
-};
+interface DashboardShellProps {
+  children: ReactNode;
+  workspace: Workspace;
+  /** The signed-in staff member, from the workspace layout. */
+  user: User;
+  /** Their notifications as of this render; the bell keeps them fresh. */
+  notifications: NotificationList;
+}
 
-const logisticsUser: TopbarUser = {
-  name: "Olateju Oyetoke",
-  role: "Logistics",
-};
-
-export function DashboardShell({ children, role = "logistics" }: { children: ReactNode; role?: "admin" | "logistics" }) {
-  const currentUser = role === "admin" ? adminUser : logisticsUser;
+export function DashboardShell({ children, workspace, user, notifications }: DashboardShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <div className="flex min-h-screen bg-background">
-      <Sidebar role={role} />
+      <Sidebar workspace={workspace} />
 
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
@@ -42,14 +38,14 @@ export function DashboardShell({ children, role = "logistics" }: { children: Rea
             >
               <X className="size-5" />
             </button>
-            <SidebarContent role={role} onNavigate={() => setMobileOpen(false)} />
+            <SidebarContent workspace={workspace} onNavigate={() => setMobileOpen(false)} />
           </div>
         </div>
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar user={currentUser} onMenuClick={() => setMobileOpen(true)} />
-        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+        <Topbar user={user} notifications={notifications} onMenuClick={() => setMobileOpen(true)} />
+        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 print:p-0">{children}</main>
       </div>
     </div>
   );

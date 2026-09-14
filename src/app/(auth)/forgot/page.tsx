@@ -9,9 +9,9 @@ export const metadata: Metadata = {
 export default function ForgotPasswordPage() {
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
-      <div className="relative hidden min-h-screen bg-[#f4f2f1] lg:block">
+      <div className="relative hidden min-h-screen bg-auth-panel lg:block">
         <Image
-          src="/sideimage.png"
+          src="/sideimage.webp"
           alt="BOVAS & Company fuel logistics — store, dispatch, deliver"
           fill
           priority

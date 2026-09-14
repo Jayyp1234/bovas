@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
-import { Settings } from "lucide-react";
-import { PagePlaceholder } from "@/components/layout/page-placeholder";
+import { SettingsPage } from "@/components/layout/settings-page";
+import { AccountSettings } from "@/features/account/components/account-settings";
+import { requireRole } from "@/lib/auth/current-user";
 
 export const metadata: Metadata = { title: "Settings" };
 
-export default function SafetySettingsPage() {
+export default async function SafetySettingsPage() {
+  const user = await requireRole("safety");
+
   return (
-    <PagePlaceholder
-      title="Settings"
-      icon={Settings}
-      description="Manage your profile and inspection preferences."
-    />
+    <SettingsPage>
+      <AccountSettings user={user} />
+    </SettingsPage>
   );
 }

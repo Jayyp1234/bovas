@@ -1,20 +1,19 @@
 import { Badge } from "@/components/ui/badge";
-import type { TicketStatus } from "../types";
+import { STATUS_GROUP_LABEL, ticketStatusGroup } from "@/domain/labels";
+import type { TicketStatus, TicketStatusGroup } from "@/lib/api/types";
 
-const STATUS_CONFIG: Record<
-  TicketStatus,
-  { label: string; variant: "success" | "warning" | "danger" }
-> = {
-  approved: { label: "Approved", variant: "success" },
-  pending: { label: "Pending", variant: "warning" },
-  rejected: { label: "Rejected", variant: "danger" },
+const VARIANT: Record<TicketStatusGroup, "success" | "warning" | "danger"> = {
+  approved: "success",
+  pending: "warning",
+  rejected: "danger",
 };
 
+/** Collapses the workflow status into the Approved / Pending / Rejected badge. */
 export function StatusBadge({ status }: { status: TicketStatus }) {
-  const { label, variant } = STATUS_CONFIG[status];
+  const group = ticketStatusGroup(status);
   return (
-    <Badge variant={variant} withDot>
-      {label}
+    <Badge variant={VARIANT[group]} withDot>
+      {STATUS_GROUP_LABEL[group]}
     </Badge>
   );
 }

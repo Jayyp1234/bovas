@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AuditDetail } from "@/features/admin/components/audit-detail";
-import { getAuditRecordById } from "@/features/admin/data/audit";
+import { getAuditDetail } from "@/lib/api/audit";
 
 export const metadata: Metadata = { title: "Audit Detail" };
 
 interface AuditDetailPageProps {
+  /** `auditId` is the loading ticket number. */
   params: Promise<{ auditId: string }>;
 }
 
 export default async function AuditDetailPage({ params }: AuditDetailPageProps) {
   const { auditId } = await params;
-  const record = getAuditRecordById(auditId);
+  const record = await getAuditDetail(auditId);
 
   if (!record) {
     notFound();

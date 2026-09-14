@@ -1,15 +1,9 @@
 import type { Metadata } from "next";
-import { LifeBuoy } from "lucide-react";
-import { PagePlaceholder } from "@/components/layout/page-placeholder";
+import { supportFaqs } from "@/config/support";
+import { SupportCenter } from "@/features/support/components/support-center";
 
 export const metadata: Metadata = { title: "Support" };
 
 export default function SafetySupportPage() {
-  return (
-    <PagePlaceholder
-      title="Support"
-      icon={LifeBuoy}
-      description="Reach the operations team and review safety procedures."
-    />
-  );
+  return <SupportCenter faqs={supportFaqs("safety")} />;
 }

@@ -1,0 +1,145 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# The API types and end-to-end tests need bovas-api. In the repository settings, set the
+# variable API_REPOSITORY (e.g. Jayyp1234/bovas-api) and, if that repository is private, the
+# secret API_REPO_TOKEN (a fine-grained token with read access to its contents).
+env:
+  API_REPOSITORY: ${{ vars.API_REPOSITORY }}
+
+jobs:
+  checks:
+    name: Lint, types and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      # Without API_URL the build uses the mock adapter, as on a preview deploy.
+      - run: npm run build
+
+  api-types:
+    name: API types match openapi.yaml
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Require the API repository setting
+        if: env.API_REPOSITORY == ''
+        run: |
+          echo "::error::Set the API_REPOSITORY repository variable so CI can compare src/lib/api/schema.d.ts with bovas-api/openapi.yaml."
+          exit 1
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.API_REPOSITORY }}
+          token: ${{ secrets.API_REPO_TOKEN || github.token }}
+          path: bovas-api-checkout
+
+      # npm run api:types reads ../bovas-api/openapi.yaml, as in local development.
+      - run: ln -s "$GITHUB_WORKSPACE/bovas-api-checkout" ../bovas-api
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run api:types
+
+      - name: Fail if schema.d.ts is out of date
+        run: |
+          if ! git diff --exit-code -- src/lib/api/schema.d.ts; then
+            echo "::error file=src/lib/api/schema.d.ts::Out of date with bovas-api/openapi.yaml. Run npm run api:types and commit the result."
+            exit 1
+          fi
+
+  e2e:
+    name: End-to-end (golden path and role access)
+    needs: checks
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+
+    env:
+      API_URL: http://127.0.0.1:8000
+      BOVAS_API_DIR: ../bovas-api
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Require the API repository setting
+        if: env.API_REPOSITORY == ''
+        run: |
+          echo "::error::Set the API_REPOSITORY repository variable so CI can run the end-to-end tests against bovas-api."
+          exit 1
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.API_REPOSITORY }}
+          token: ${{ secrets.API_REPO_TOKEN || github.token }}
+          path: bovas-api-checkout
+      - run: ln -s "$GITHUB_WORKSPACE/bovas-api-checkout" ../bovas-api
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, pdo_mysql
+          coverage: none
+          tools: composer:v2
+
+      - name: Start bovas-api with the demo depot
+        working-directory: ../bovas-api
+        run: |
+          composer install --no-interaction --no-progress --prefer-dist
+          cp .env.example .env
+          sed -i 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+          php bin/db-create.php
+          php bin/reset-demo.php
+          php -S 127.0.0.1:8000 -t public public/index.php > storage/logs/server.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8000/api/health && break; sleep 1; done
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+
+      # playwright.config.ts starts `npm run start`; the tests reset the demo depot first.
+      - run: npm run test:e2e
+
+      - name: Keep the report and API log when tests fail
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+            ../bovas-api/storage/logs
+          retention-days: 7

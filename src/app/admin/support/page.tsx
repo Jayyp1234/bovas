@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
-import { LifeBuoy } from "lucide-react";
-import { PagePlaceholder } from "@/components/layout/page-placeholder";
+import { SupportInbox } from "@/features/admin/components/support-inbox";
+import { listSupportRequests } from "@/lib/api/support";
+import { intParam, oneOfParam, type SearchParams } from "@/lib/search-params";
 
 export const metadata: Metadata = { title: "Support" };
 
-export default function AdminSupportPage() {
-  return (
-    <PagePlaceholder
-      title="Support"
-      icon={LifeBuoy}
-      description="Reach the platform team and review common admin questions."
-    />
-  );
+export default async function AdminSupportPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  const params = await searchParams;
+  // Open requests by default; "all" drops the filter.
+  const status = oneOfParam(params, "status", ["open", "resolved", "all"] as const) ?? "open";
+  const requests = await listSupportRequests({
+    status: status === "all" ? undefined : status,
+    page: intParam(params, "page"),
+    per_page: 10,
+  });
+
+  return <SupportInbox requests={requests.data} meta={requests.meta} />;
 }

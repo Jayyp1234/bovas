@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 
 interface AvatarProps {
   name: string;
+  /** A picture URL; a user's `avatar_url` from the API can be passed as it is. */
   src?: string;
   className?: string;
 }
@@ -16,7 +17,18 @@ function initialsOf(name: string): string {
     .join("");
 }
 
+/**
+ * `avatar_url` points at bovas-api (`/api/staff/BO003/avatar?v=…`). The browser loads it
+ * through the web app's /staff-avatars route, which adds the session token.
+ */
+function browserSrc(src?: string): string | undefined {
+  const match = src?.match(/^\/api\/staff\/([^/?]+)\/avatar(\?.*)?$/);
+  return match ? `/staff-avatars/${match[1]}${match[2] ?? ""}` : src;
+}
+
 export function Avatar({ name, src, className }: AvatarProps) {
+  const url = browserSrc(src);
+
   return (
     <span
       className={cn(
@@ -24,9 +36,9 @@ export function Avatar({ name, src, className }: AvatarProps) {
         className,
       )}
     >
-      {src ? (
+      {url ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt={name} className="size-full object-cover" />
+        <img src={url} alt={name} className="size-full object-cover" />
       ) : (
         initialsOf(name)
       )}
